@@ -1,21 +1,23 @@
 /**
- * JQuery function calls iris color picker.
+ * Hello Star jQuery script
  */
 jQuery(document).ready(function($) {
-    var url = "https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY";
+    //Color Picker
     $('.text-color').wpColorPicker({
         change: function(event, ui) {
-            $("#hello_star").css('color', ui.color.toString());
+           $("#hello_star").css('color', ui.color.toString());
         },
         palettes: true
     });
-
     $('.text-bg-color').wpColorPicker({
-        change: function(event, ui) {
-            $("#hello_star").css( 'backgroundColor', ui.color.toString());
-        },
+       change: function(event, ui) {
+          $("#hello_star").css('backgroundColor', ui.color.toString());
+       },
         palettes: true
     });
+    // --------------------------------------------------
+    //Replace DEMO_KEY in this URL with your new API key.
+    var url = "https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY";
     //Ajax call for Nasa apod. This code was taken from https://api.nasa.gov/.
     $.ajax({
         url: url,
@@ -26,7 +28,6 @@ jQuery(document).ready(function($) {
             else {
                 $("#copyright").text("Image Credits: " + "Public Domain");
             }
-
             if(result.media_type == "video") {
                 $("#apod_img_id").css("display", "none");
                 $("#apod_vid_id").attr("src", result.url);

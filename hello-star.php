@@ -6,8 +6,7 @@
  * Description: Yet another plugin inspired by Hello Dolly. This plugin shows information about the 88 constellations and their stars that are most visible given your location, date and time.
  * Author: Sarah Al
  * Author URI: http://icodeforweb.com
- * Plugin URI: https://github.com
- * Text Domain: hello-star
+ * Plugin URI: https://github.com/Sarahphp1/hello-star
  * License: GPL v2+
  * License URI: hhttp://www.gnu.org/licenses/gpl-2.0.html
 */
@@ -17,16 +16,17 @@ if ( !defined( 'ABSPATH' ) ) exit;
 
 // Make sure Wordpress version is 3.5 or higher since color picker has been introduced since -v 3.5.
 global $wp_version;
+$exitMsg = 'This plugin utilizes Wordpress iris color picker. Wordpress version 3.5 or higher is required.<br />
+            <a href="http://codex.wordpress.org/Upgrading_WordPress">Please update!</a>';
 if (version_compare($wp_version,"3.5","<"))
 {
-	exit ('This plugin utilizes Wordpress iris color picker. Wordpress version 3.5 or higher is required.');
+    wp_die( $exitMsg );
 }
 
 
 /* ------------------------------------------------*/
 /* -------------- Constellation -------------------*/
 /* ------------------------------------------------*/
-
 
 /**
  * Find file and access its content.
@@ -84,16 +84,16 @@ add_action( 'admin_menu', 'hs_hellostar_menu' );
 function hs_hellostar_menu() {
 	//Generate admin page.
 	add_options_page( 'Hello Star Options', 'Hello Star', 'manage_options', 'hello_star', 'hs_hellostar_options' );
-	//Activte custom settings.
-	add_action( 'admin_init', 'hs_custom_settings' );
+	//Activate custom settings.
+	add_action( 'admin_init', 'hs_hellostar_custom_settings' );
 }
 
 /**
  * Register and add fields.
  */
-function hs_custom_settings(){
-	register_setting( 'hello_star', 'text_color', 'validate_options');
-	register_setting( 'hello_star', 'text_color_bg', 'validate_options' );
+function hs_hellostar_custom_settings(){
+	register_setting( 'hello_star', 'text_color');
+	register_setting( 'hello_star', 'text_color_bg');
 }
 
 /**
@@ -128,13 +128,13 @@ function hs_hellostar_options() {
 				<tr valign="top">
 					<th scope="row">Text</th>
 					<td>
-						<input type="text" value="' .$textColor. '" class="text-color" name="text_color" data-default-color="#fff" />
+						<input type="text" value="' .$textColor. '" class="text-color" name="text_color" placeholder="Hex code" data-default-color="#fff" />
 					</td>
 				</tr>
 				<tr valign="top">
 					<th scope="row">Text Background</th>
 					<td>
-						<input type="text" value="' .$textBgColor. '" class="text-bg-color" name="text_color_bg" data-default-color="#000" />
+						<input type="text" value="' .$textBgColor. '" class="text-bg-color" name="text_color_bg" placeholder="Hex code" data-default-color="#000" />
 					</td>
 				</tr>
 		</table>
@@ -156,14 +156,14 @@ function hs_hellostar_color_picker() {
 		wp_enqueue_script( 'hs-color-script', plugins_url( 'hello-star.js', __FILE__ ), array( 'wp-color-picker' ), false, true );
 }
 
-// Add function hs_enqueue_styles to the admin_enqueue_scripts hook.
-add_action( 'admin_enqueue_scripts', 'hs_enqueue_styles' );
+// Add function hs_hellostar_enqueue_styles to the admin_enqueue_scripts hook.
+add_action( 'admin_enqueue_scripts', 'hs_hellostar_enqueue_styles' );
 
 /**
  * This function applies the color choice of the user to the chosen line.
  * And adds some css styling.
  */
-function hs_enqueue_styles() {
+function hs_hellostar_enqueue_styles() {
 	$textColor = esc_attr(get_option( 'text_color' ));
 	$textBgColor = esc_attr(get_option( 'text_color_bg' ));
 	$x = is_rtl() ? 'left' : 'right'; //Check language positioning - true if rtl
@@ -181,44 +181,4 @@ function hs_enqueue_styles() {
 		}
 		</style>
 		';
-}
-
-/* ------------------------------------------------*/
-/* ------------------ Validation ------------------*/
-/* ------------------------------------------------*/
-
-/**
- * Function that will validate all fields.
- *
- * @param $field
- *
- * @return mixed
- */
-function validate_options( $field ) {
-	// Validate field color
-	$fieldColor = trim( $field);
-	$fieldColor = strip_tags( stripslashes( $fieldColor) );
-		// Check if is a valid hex color
-	if( FALSE === check_color( $fieldColor ) ) {
-		// Set the error message
-		add_settings_error( 'hello_star', 'hs_bg_error', 'Insert a valid color', 'error' );
-		$valid_field = '';
-	} else {
-		$valid_field = $fieldColor;
-	}
-	return apply_filters( 'validate_options', $valid_field, $field);
-}
-
-/**
- * Function that will check if value is a valid HEX color.
- *
- * @param $value
- *
- * @return bool
- */
-function check_color( $value ) {
-	if ( preg_match( '/^#[a-f0-9]{6}$/i', $value ) ) { // if user insert a HEX color with #
-		return true;
-	}
-	return false;
 }
